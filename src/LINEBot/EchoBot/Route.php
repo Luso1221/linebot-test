@@ -18,6 +18,7 @@
 
 namespace LINE\LINEBot\EchoBot;
 
+use PDO;
 use LINE\LINEBot\Constant\HTTPHeader;
 use LINE\LINEBot\Event\MessageEvent;
 use LINE\LINEBot\Event\MessageEvent\TextMessage;
@@ -26,9 +27,10 @@ use LINE\LINEBot\Exception\InvalidSignatureException;
 
 class Route
 {
+    public $messages = array();
     public function register(\Slim\App $app)
     {
-        $app->post('/callback', function (\Slim\Http\Request $req, \Slim\Http\Response $res) {
+        $app->post('/callback', function (\Slim\Http\Request $req, \Slim\Http\Response $res)  {
             /** @var \LINE\LINEBot $bot */
             $bot = $this->bot;
             /** @var \Monolog\Logger $logger */
@@ -37,38 +39,69 @@ class Route
             $signature = $req->getHeader(HTTPHeader::LINE_SIGNATURE);
             // error_log(print_r($req->getBody(),true));
             if (empty($signature)) {
-                error_log( 'empty signature');
                 return $res->withStatus(400, 'Bad Request');
             }
 
             // Check request with signature and parse request
             try {
-                // error_log("Try");
+                error_log("Try");
                 $events = $bot->parseEventRequest($req->getBody(), $signature[0]);
             } catch (InvalidSignatureException $e) {
 
-                // error_log($e);
+                error_log("Error",$e);
                 return $res->withStatus(400, 'Invalid signature');
             } catch (InvalidEventRequestException $e) {
-                // error_log($e);
+                error_log("Error",$e);
                 return $res->withStatus(400, "Invalid event request");
             }
 
             foreach ($events as $event) {
+
                 if (!($event instanceof MessageEvent)) {
                     $logger->info('Non message event has come');
                     continue;
                 }
 
-                if (!($event instanceof TextMessage)) {
-                    $logger->info('Non text message has come');
+                if (($event instanceof ImageMessage)) {
+                    error_log(print_r($event->getContentProvider(),true));
+                    continue;
+                }
+                if (($event instanceof TextMessage)) {
+                    $test = 0;
+
+                    $resp = $bot->getProfile($event->getUserId());
+                    $name = '';
+
+                    if ($resp->isSucceeded()) {
+                        $profile = $resp->getJSONDecodedBody();
+                        $displayName = $profile['displayName'];
+                        $name =$displayName;
+                    } else {
+                        error_log(print_r($resp->getJSONDecodedBody()));
+                    }
+                    $text = $event->getText();
+                    $timestamp = date("Y-m-d H:i:s", substr($event->getTimestamp(), 0, -3));
+
+                    try {
+                        $db = $this->db;
+                        $sql = $db->prepare("INSERT INTO messages (id, name, text,timestamp) VALUES (:id, :name, :text, :timestamp)");
+                        // use exec() because no results are returned
+                        $sql->bindParam(':id', $test, PDO::PARAM_INT);
+                        $sql->bindParam(':name', $name, PDO::PARAM_STR, 12);
+                        $sql->bindParam(':text', $text, PDO::PARAM_STR, 12);
+                        $sql->bindParam(':timestamp', $timestamp, PDO::PARAM_STR);
+                        $sql->execute();
+                        }
+                    catch(PDOException $e)
+                        {
+                            error_log( $sql . "<br>" . $e->getMessage());
+                        }
                     continue;
                 }
 
-                $replyText = $event->getText();
-                $logger->info('Reply text: ' . $replyText);
-                $resp = $bot->replyText($event->getReplyToken(), $replyText);
-                $logger->info($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
+
+                // $resp = $bot->replyText($event->getReplyToken(), $replyText);
+                // error_log($resp->getHTTPStatus() . ': ' . $resp->getRawBody());
             }
 
             // error_log(print_r($events,true));

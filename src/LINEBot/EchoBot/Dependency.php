@@ -18,6 +18,7 @@
 
 namespace LINE\LINEBot\EchoBot;
 
+use PDO;
 use LINE\LINEBot;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 
@@ -46,5 +47,15 @@ class Dependency
             ]);
             return $bot;
         };
+
+        $container['db'] = function ($c) {
+            $db = $c['settings']['db'];
+            $pdo = new PDO('mysql:host=' . $db['host'] . ';dbname=' . $db['dbname'],
+                $db['user'], $db['pass']);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            return $pdo;
+        };
+
     }
 }

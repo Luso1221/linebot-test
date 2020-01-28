@@ -22,19 +22,22 @@ class Setting
 {
     public static function getSetting()
     {
-        $channel_token = 'dJhI5iaBe5nWYbuszbHiKqIyiHWW3FgZgI3Sqhufos4jICridjv8W
-        7ZINfysHwxfqdJj3sAnuQSaygsyw0iZxVLLD/9xcHJJHxruEGh76GA9BpeESOHa/
-        d74zd+YVvOK75fn4SYcT7wvcEtoaiz1ggdB04t89/1O/w1cDnyilFU=';
+        $channel_token = '7GNcPZ5PIojuJ5LbaKQchtwI/UESxbY1UCvEm1GJQeXSVJwuaSu+5urOjaMLh2loqdJj3sAnuQSaygsyw0iZxVLLD/9xcHJJHxruEGh76GAo+bQbwdKQ2lG1GIzAtcK3rPEdecfBFKT8BaA5O0fdXgdB04t89/1O/w1cDnyilFU=';
         $channel_secret = 'bfbe7b86b9ddd70e8ddebdf084573f28';
         return [
             'settings' => [
-                'displayErrorDetails' => true, // set to false in production
+                'displayErrorDetails' => false, // set to false in production
 
                 'logger' => [
                     'name' => 'slim-app',
                     'path' => __DIR__ . '/../../../logs/app.log',
                 ],
-
+                'db' => [
+                    'host' => 'localhost',
+                    'dbname' => 'line_bot',
+                    'user' => 'root',
+                    'pass' => '',
+                ],
                 'bot' => [
                     'channelToken' => getenv('LINEBOT_CHANNEL_TOKEN') ?: $channel_token,
                     'channelSecret' => getenv('LINEBOT_CHANNEL_SECRET') ?: $channel_secret,
