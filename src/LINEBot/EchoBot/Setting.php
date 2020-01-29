@@ -22,8 +22,8 @@ class Setting
 {
     public static function getSetting()
     {
-        $channel_token = '7GNcPZ5PIojuJ5LbaKQchtwI/UESxbY1UCvEm1GJQeXSVJwuaSu+5urOjaMLh2loqdJj3sAnuQSaygsyw0iZxVLLD/9xcHJJHxruEGh76GAo+bQbwdKQ2lG1GIzAtcK3rPEdecfBFKT8BaA5O0fdXgdB04t89/1O/w1cDnyilFU=';
-        $channel_secret = 'bfbe7b86b9ddd70e8ddebdf084573f28';
+        $channel_token = '<channel_token>';
+        $channel_secret = '<channel_secret>';
         return [
             'settings' => [
                 'displayErrorDetails' => false, // set to false in production
